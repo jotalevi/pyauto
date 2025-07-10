@@ -112,14 +112,15 @@ jobs:
         id: build
         run: |
           pyinstaller --noconfirm --onefile --windowed --name PyAuto src/pyauto.py
-          APP=$(ls dist/* | head -n 1)
-          echo "app_path=$APP" >> $GITHUB_OUTPUT
+          cd dist
+          zip -r PyAuto.app.zip PyAuto.app
+          echo "app_path=dist/PyAuto.app.zip" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-app
-          path: ${{ steps.build.outputs.app_path }}
+          path: dist/PyAuto.app.zip
 
   release:
     name: Create GitHub Release
