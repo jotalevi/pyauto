@@ -37,7 +37,7 @@ jobs:
       - name: Build Windows EXE
         id: build
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name pyauto src/pyauto.py
+          pyinstaller --noconfirm --onefile --windowed --name pyauto --hidden-import pynput src/pyauto.py
           $exe = Get-ChildItem -Path dist -Filter *.exe | Select-Object -First 1
           echo "exe_path=dist\$($exe.Name)" >> $env:GITHUB_OUTPUT
 
@@ -74,7 +74,7 @@ jobs:
       - name: Build Linux binary
         id: build
         run: |
-          pyinstaller --noconfirm --onefile --name pyauto src/pyauto.py
+          pyinstaller --noconfirm --onefile --name pyauto --hidden-import pynput src/pyauto.py
           BIN=$(ls dist/* | head -n 1)
           echo "bin_path=$BIN" >> $GITHUB_OUTPUT
 
@@ -111,7 +111,7 @@ jobs:
       - name: Build macOS app
         id: build
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name PyAuto src/pyauto.py
+          pyinstaller --noconfirm --onefile --windowed --name PyAuto --hidden-import pynput src/pyauto.py
           cd dist
           zip -r PyAuto.app.zip PyAuto.app
           echo "app_path=dist/PyAuto.app.zip" >> $GITHUB_OUTPUT
