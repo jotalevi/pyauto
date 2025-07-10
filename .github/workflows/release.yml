@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller
+          pip install pyinstaller pynput
 
       - name: Read version file
         id: version
@@ -34,10 +34,21 @@ jobs:
           $version = Get-Content project.ver
           echo "version=$version" >> $env:GITHUB_OUTPUT
 
+      - name: Clean build folders
+        run: |
+          if (Test-Path dist) { Remove-Item dist -Recurse -Force }
+          if (Test-Path build) { Remove-Item build -Recurse -Force }
+          if (Test-Path pyauto.spec) { Remove-Item pyauto.spec -Force }
+
       - name: Build Windows EXE
         id: build
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name pyauto --hidden-import pynput src/pyauto.py
+          pyinstaller --noconfirm --onefile --windowed --name pyauto `
+            --hidden-import pynput `
+            --hidden-import pynput.mouse `
+            --hidden-import pynput.keyboard `
+            src/pyauto.py
+
           $exe = Get-ChildItem -Path dist -Filter *.exe | Select-Object -First 1
           echo "exe_path=dist\$($exe.Name)" >> $env:GITHUB_OUTPUT
 
@@ -63,7 +74,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller
+          pip install pyinstaller pynput
 
       - name: Read version file
         id: version
@@ -71,10 +82,19 @@ jobs:
           VERSION=$(cat project.ver)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Clean build folders
+        run: |
+          rm -rf dist build pyauto.spec
+
       - name: Build Linux binary
         id: build
         run: |
-          pyinstaller --noconfirm --onefile --name pyauto --hidden-import pynput src/pyauto.py
+          pyinstaller --noconfirm --onefile --windowed --name pyauto \
+            --hidden-import pynput \
+            --hidden-import pynput.mouse \
+            --hidden-import pynput.keyboard \
+            src/pyauto.py
+
           BIN=$(ls dist/* | head -n 1)
           echo "bin_path=$BIN" >> $GITHUB_OUTPUT
 
@@ -100,7 +120,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller
+          pip install pyinstaller pynput
 
       - name: Read version file
         id: version
@@ -108,10 +128,19 @@ jobs:
           VERSION=$(cat project.ver)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Clean build folders
+        run: |
+          rm -rf dist build pyauto.spec
+
       - name: Build macOS app
         id: build
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name PyAuto --hidden-import pynput src/pyauto.py
+          pyinstaller --noconfirm --onefile --windowed --name PyAuto \
+            --hidden-import pynput \
+            --hidden-import pynput.mouse \
+            --hidden-import pynput.keyboard \
+            src/pyauto.py
+
           cd dist
           zip -r PyAuto.app.zip PyAuto.app
           echo "app_path=dist/PyAuto.app.zip" >> $GITHUB_OUTPUT
@@ -164,5 +193,5 @@ jobs:
           files: |
             artifacts/windows-exe/*.exe
             artifacts/linux-binary/*
-            artifacts/macos-app/*
+            artifacts/macos-app/*.zip
             source_code.zip
